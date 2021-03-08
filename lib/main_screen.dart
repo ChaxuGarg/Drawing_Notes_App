@@ -1,3 +1,4 @@
+import 'package:drawing_notes_app/drawing_screen.dart';
 import 'package:flutter/material.dart';
 
 class Drawing {
@@ -75,9 +76,11 @@ class _MainScreenState extends State<MainScreen> {
                               onPressed: () {
                                 setState(() {
                                   drawingWidgets.add(ListTile(title: Text(newDrawing.text)));
+                                  newDrawing.text = "";
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => DrawingScreen()));
                                 });
-                                newDrawing.text = "";
-                                Navigator.of(context).pop();
+
                               },
                             ),
                           )
