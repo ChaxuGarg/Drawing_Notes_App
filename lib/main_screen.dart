@@ -19,6 +19,7 @@ class _MainScreenState extends State<MainScreen> {
 
   List<Drawing> drawings = [];
   List<ListTile> drawingWidgets = [];
+  List<ListTile> newDrawingList = [];
   TextEditingController search = TextEditingController();
   TextEditingController newDrawing = TextEditingController();
   List<List<Offset>> _points = [<Offset>[]];
@@ -85,6 +86,7 @@ class _MainScreenState extends State<MainScreen> {
                                 setState(() {
                                   _points.add(result);
                                   drawingWidgets.add(ListTile(title: Text(newDrawing.text), onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => DrawingScreen(points: result)));
+                                  newDrawingList = List.from(drawingWidgets);
                                     },
                                   ));
                                   newDrawing.text = "";
@@ -105,6 +107,12 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  onItemChanged(String value) {
+    setState(() {
+      newDrawingList = drawingWidgets.where((string) => string.title.toString().toLowerCase().contains(value.toLowerCase())).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,8 +123,12 @@ class _MainScreenState extends State<MainScreen> {
         children: <Widget> [
           TextField(
             controller: search,
+            decoration: InputDecoration(
+              hintText: 'Search filter',
+            ),
+            onChanged: onItemChanged,
           )
-        ] + drawingWidgets,
+        ] + newDrawingList,
       ),
       floatingActionButton: FloatingActionButton(
         tooltip: "Add",
