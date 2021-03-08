@@ -1,6 +1,7 @@
 import 'package:drawing_notes_app/drawing_screen.dart';
 import 'package:flutter/material.dart';
 
+
 class Drawing {
   String name = "";
 
@@ -20,6 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   List<ListTile> drawingWidgets = [];
   TextEditingController search = TextEditingController();
   TextEditingController newDrawing = TextEditingController();
+  List<List<Offset>> _points = [<Offset>[]];
   final _formKey = GlobalKey<FormState>();
 
   void addNewDrawing(String name) {
@@ -32,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   _showDialog(context) {
     showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (BuildContext dialogContext) {
           return AlertDialog(
             content: Stack(
               overflow: Overflow.visible,
@@ -64,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
                               color: Colors.red,
                               child: Text("Cancel"),
                               onPressed: () {
-                                Navigator.of(context).pop();
+                                Navigator.of(dialogContext).pop();
                               },
                             ),
                           ),
@@ -73,14 +75,21 @@ class _MainScreenState extends State<MainScreen> {
                             child: RaisedButton(
                               color: Colors.green,
                               child: Text("Add"),
-                              onPressed: () {
+                              onPressed: () async {
+                                List<Offset> save =[];
+                                final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (drawingContext) => DrawingScreen(points: save),
+                                    ));
                                 setState(() {
-                                  drawingWidgets.add(ListTile(title: Text(newDrawing.text)));
+                                  _points.add(result);
+                                  drawingWidgets.add(ListTile(title: Text(newDrawing.text), onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => DrawingScreen(points: result)));
+                                    },
+                                  ));
                                   newDrawing.text = "";
-                                  Navigator.of(context).pop();
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => DrawingScreen()));
+                                  Navigator.of(dialogContext).pop();
                                 });
-
                               },
                             ),
                           )

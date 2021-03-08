@@ -1,13 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+
 class DrawingScreen extends StatefulWidget {
+  List<Offset> points = <Offset>[];
+
+  DrawingScreen({Key key, @required this.points}) : super(key: key);
   @override
   _DrawingScreenState createState() => _DrawingScreenState();
 }
 
 class _DrawingScreenState extends State<DrawingScreen> {
-  List<Offset> _points = <Offset>[];
+
 
   @override
   Widget build(BuildContext context) {
@@ -19,19 +23,21 @@ class _DrawingScreenState extends State<DrawingScreen> {
               RenderBox object = context.findRenderObject();
               Offset _localPosition =
                   object.globalToLocal(details.globalPosition);
-              _points = new List.from(_points)..add(_localPosition);
+              widget.points = new List.from(widget.points)..add(_localPosition);
             });
           },
-          onPanEnd: (DragEndDetails details) => _points.add(null),
+          onPanEnd: (DragEndDetails details) => widget.points.add(null),
           child: CustomPaint(
-            painter: DrawingSheet(points: _points),
+            painter: DrawingSheet(points: widget.points),
             size: Size.infinite,
           )
         )
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.clear),
-        onPressed: () => _points.clear(),
+        onPressed: () {
+          Navigator.pop(context, widget.points);
+        },
       ),
     );
   }
