@@ -86,9 +86,10 @@ class _MainScreenState extends State<MainScreen> {
                                 setState(() {
                                   _points.add(result);
                                   drawingWidgets.add(ListTile(title: Text(newDrawing.text), onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => DrawingScreen(points: result)));
-                                  newDrawingList = List.from(drawingWidgets);
+
                                     },
                                   ));
+                                  newDrawingList = List.from(drawingWidgets);
                                   newDrawing.text = "";
                                   Navigator.of(dialogContext).pop();
                                 });
@@ -140,3 +141,6 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 }
+
+
+
