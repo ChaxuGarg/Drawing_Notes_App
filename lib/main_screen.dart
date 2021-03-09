@@ -32,6 +32,21 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  // ignore: non_constant_identifier_names
+  ListTile return_list_tile (String title, List<Offset> result){
+    return ListTile(
+      title: Text(
+          title,
+        style: TextStyle(
+          fontSize: 40.0,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => DrawingScreen(points: result)));
+      },
+    );
+  }
   _showDialog(context) {
     showDialog(
         context: context,
@@ -85,10 +100,7 @@ class _MainScreenState extends State<MainScreen> {
                                     ));
                                 setState(() {
                                   _points.add(result);
-                                  drawingWidgets.add(ListTile(title: Text(newDrawing.text), onTap: () {Navigator.push(context, MaterialPageRoute(builder: (context) => DrawingScreen(points: result)));
-
-                                    },
-                                  ));
+                                  drawingWidgets.add(return_list_tile(newDrawing.text, result));
                                   newDrawingList = List.from(drawingWidgets);
                                   newDrawing.text = "";
                                   Navigator.of(dialogContext).pop();
@@ -120,17 +132,27 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: Text("Drawing Notes"),
       ),
-      body: ListView(
-        children: <Widget> [
-          TextField(
-            controller: search,
-            decoration: InputDecoration(
-              hintText: 'Search filter',
-            ),
-            onChanged: onItemChanged,
+      body: Card(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget> [
+            Padding(
+                padding: EdgeInsets.all((4.0)),
+                child: TextField(
+                  scrollPadding: EdgeInsets.all(8.0),
+                  controller: search,
+                  decoration: InputDecoration(
+                    hintText: 'Search filter',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue)
+                    ),
+                  ),
+                  onChanged: onItemChanged,
+                ),
+            ) ] + newDrawingList,
           )
-        ] + newDrawingList,
-      ),
+        ),
       floatingActionButton: FloatingActionButton(
         tooltip: "Add",
         child: Icon(Icons.add),
