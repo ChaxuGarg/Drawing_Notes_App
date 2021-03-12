@@ -68,6 +68,7 @@ class _MainScreenState extends State<MainScreen> {
                   MaterialPageRoute(
                       builder: (context) => DrawingScreen(
                             points: _points[index],
+                        title: titles[index],
                           )));
               setState(() {
                 _points[index] = result;
@@ -100,7 +101,8 @@ class _MainScreenState extends State<MainScreen> {
         if (listOffset[k] != 'null') {
           if (listOffset[k].contains('null')) {
             String s = listOffset[k].split('null, ')[1];
-            listOffset[k] = null;
+            listOffset[k] = 'null';
+            drawing.add(null);
             listOffset.insert(k + 1, s);
             continue;
           }
@@ -243,7 +245,7 @@ class _MainScreenState extends State<MainScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (drawingContext) =>
-                                          DrawingScreen(points: List<Offset>()),
+                                          DrawingScreen(points: List<Offset>(), title: newDrawing.text),
                                     ));
                                 setState(() {
                                   _points.add(result);

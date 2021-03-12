@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class DrawingScreen extends StatefulWidget {
   List<Offset> points = <Offset>[];
+  String title;
 
-  DrawingScreen({Key key, @required this.points}) : super(key: key);
+  DrawingScreen({Key key, @required this.points, @required this.title}) : super(key: key);
   @override
   _DrawingScreenState createState() => _DrawingScreenState();
 }
@@ -16,6 +17,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        automaticallyImplyLeading: false,
+      ),
       body: Container(
         child: GestureDetector(
           onPanUpdate: (DragUpdateDetails details){
@@ -33,12 +38,30 @@ class _DrawingScreenState extends State<DrawingScreen> {
           )
         )
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.clear),
-        onPressed: () {
-          Navigator.pop(context, widget.points);
-        },
-      ),
+      floatingActionButton: Padding(
+        padding: EdgeInsets.all(50.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            FloatingActionButton(
+              heroTag: 'clear',
+              child: Icon(Icons.clear),
+              onPressed: () {
+                setState(() {
+                  widget.points = [null];
+                });
+              },
+            ),
+            FloatingActionButton(
+              heroTag: 'save',
+              child: Icon(Icons.save),
+              onPressed: () {
+                Navigator.pop(context, widget.points);
+              },
+            ),
+          ],
+        ),
+      )
     );
   }
 }
