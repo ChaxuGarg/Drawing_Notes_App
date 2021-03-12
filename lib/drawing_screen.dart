@@ -17,10 +17,10 @@ class _DrawingScreenState extends State<DrawingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        automaticallyImplyLeading: false,
-      ),
+      // appBar: AppBar(
+      //   title: Text(widget.title),
+      //   automaticallyImplyLeading: false,
+      // ),
       body: Container(
         child: GestureDetector(
           onPanUpdate: (DragUpdateDetails details){
@@ -38,9 +38,7 @@ class _DrawingScreenState extends State<DrawingScreen> {
           )
         )
       ),
-      floatingActionButton: Padding(
-        padding: EdgeInsets.all(50.0),
-        child: Row(
+      floatingActionButton: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             FloatingActionButton(
@@ -61,7 +59,6 @@ class _DrawingScreenState extends State<DrawingScreen> {
             ),
           ],
         ),
-      )
     );
   }
 }
