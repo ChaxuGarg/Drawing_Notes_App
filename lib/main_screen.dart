@@ -83,9 +83,11 @@ class _MainScreenState extends State<MainScreen> {
   _saveDrawing(List<List<Offset>> points) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String _pointsString = _points.toString();
-    prefs.setString("pointsList", _pointsString);
-    prefs.setStringList("titles", titles);
-    prefs.setInt("counter", counter);
+    setState(() {
+      prefs.setString("pointsList", _pointsString);
+      prefs.setStringList("titles", titles);
+      prefs.setInt("counter", counter);
+    });
     return true;
   }
 
@@ -119,7 +121,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   _getSavedDrawing() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs =  await SharedPreferences.getInstance();
     setState(() {
       if (prefs.getInt("counter") != null) counter = prefs.getInt("counter");
       if (prefs.getString("pointsList") != null)
@@ -135,8 +137,13 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Future start() async{
+    await SharedPreferences.getInstance();
+  }
+
   @override
   void initState() {
+    start();
     super.initState();
     setState(() {
       _isLoading = true;
