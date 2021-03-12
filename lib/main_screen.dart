@@ -1,5 +1,9 @@
+// ignore: avoid_web_libraries_in_flutter
+// import 'dart:html';
+
 import 'package:drawing_notes_app/drawing_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class MainScreen extends StatefulWidget {
@@ -12,17 +16,21 @@ class _MainScreenState extends State<MainScreen> {
   TextEditingController search = TextEditingController();
   TextEditingController newDrawing = TextEditingController();
   List<List<Offset>> _points = [<Offset>[]];
-  List<Dismissible> drawingDismissible = [];
   List<int> displayIndex = [];
   List<String> titles = [];
   int counter = 0;
+  bool _isLoading = true;
 
   final _formKey = GlobalKey<FormState>();
 
-  List<Dismissible> get_drawing_list(List<Dismissible> drawingDismissible, List<int> displayIndex) {
+  List<Dismissible> get_drawing_list(List<int> displayIndex) {
     List<Dismissible> display = [];
+    print('formula');
     for(int i = 0; i < displayIndex.length; ++i){
-      display.add(drawingDismissible[displayIndex[i]]);
+      print(i);
+      print(titles[displayIndex[i]]);
+      print(_points[displayIndex[i]]);
+      display.add(return_dismissible(titles[displayIndex[i]], _points[displayIndex[i]]));
     }
     return display;
   }
@@ -37,7 +45,6 @@ class _MainScreenState extends State<MainScreen> {
             displayIndex.removeAt(displayIndex.length - 1);
             counter--;
             _points.removeAt(index);
-            drawingDismissible.removeAt(index);
           });
 
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(titles[index] + " deleted")));
@@ -46,22 +53,98 @@ class _MainScreenState extends State<MainScreen> {
             titles.removeAt(index);
           });
         },
-        child: ListTile(
-          title: Text(
-            title,
-            style: TextStyle(
-              fontSize: 40.0,
-              fontWeight: FontWeight.w500,
+        child: Container(
+          child: ListTile(
+            title: Text(
+              title,
+              style: TextStyle(
+                fontSize: 40.0,
+                fontWeight: FontWeight.w500,
+              ),
             ),
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => DrawingScreen(points: result,))
+              );
+            },
           ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => DrawingScreen(points: result,))
-            );
-          },
-        ),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey)
+          ),
+        )
     );
+  }
+
+  _saveDrawing(List<List<Offset>> points) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String _pointsString = _points.toString();
+    prefs.setString("pointsList", _pointsString);
+    prefs.setStringList("titles", titles);
+    prefs.setInt("counter", counter);
+    return true;
+  }
+
+  List<List<Offset>> parseOffset(String pointsList) {
+    String x = pointsList.substring(1, pointsList.length-1);
+    List<String> first = x.split("]");
+    List<List<Offset>> drawings = List<List<Offset>>();
+    for(var offset in first){
+      if(offset == " " || offset == "") break;
+      print(offset);
+      List<String> listOffset = offset.substring(1, offset.length).split("), ");
+      List<Offset> drawing = List<Offset>();
+      for(int k = 0; k < listOffset.length; k++){
+        if(listOffset[k] != 'null') {
+          if(listOffset[k].contains('null')){
+            String s = listOffset[k].split('null, ')[1];
+            listOffset[k] = null;
+            listOffset.insert(k+1, s);
+            continue;
+          }
+          print(listOffset[k].split("(")[1].split(",")[0]);
+          print(listOffset[k].split(", ")[1]);
+          drawing.add(Offset(double.parse(listOffset[k].split("(")[1].split(",")[0]), double.parse(listOffset[k].split(", ")[1])));
+        } else{
+          drawing.add(null);
+          print('null');
+        }
+      }
+      drawings.add(drawing);
+    }
+    return drawings;
+  }
+
+  _getSavedDrawing() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      if(prefs.getInt("counter") != null) counter = prefs.getInt("counter");
+      if(prefs.getString("pointsList") != null) _points = parseOffset(prefs.getString("pointsList"));
+      if(prefs.getStringList("titles") != null) titles = prefs.getStringList("titles");
+      for(int i = 0; i < _points.length; ++i){
+        displayIndex.add(i);
+      }
+      print(displayIndex);
+      if(prefs.getStringList("titles") == null) {
+        displayIndex = [];
+      }
+    });
+  }
+
+  @override
+  void initState() {
+
+    super.initState();
+    setState(() {
+      _isLoading = true;
+    });
+
+    _getSavedDrawing();
+
+    setState(() {
+      _isLoading = false;
+    });
+
   }
 
   _showDialog(context) {
@@ -118,9 +201,13 @@ class _MainScreenState extends State<MainScreen> {
                                   titles.add(newDrawing.text);
                                   displayIndex.add(counter);
                                   counter++;
-                                  drawingDismissible.add(return_dismissible(newDrawing.text, result));
                                   newDrawing.text = "";
+                                  if(counter == 1){
+                                    _points.removeAt(0);
+                                  }
+                                  _saveDrawing(_points);
                                   Navigator.of(dialogContext).pop();
+
                                 });
                               },
                             ),
@@ -152,7 +239,9 @@ class _MainScreenState extends State<MainScreen> {
       body: Card(
           child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
+        children: _isLoading ? Center(
+          child: CircularProgressIndicator(),
+        ) : <Widget>[
               Padding(
                 padding: EdgeInsets.all((4.0)),
                 child: TextField(
@@ -168,7 +257,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               )
             ] +
-              get_drawing_list(drawingDismissible, displayIndex)
+              get_drawing_list(displayIndex)
       )),
       floatingActionButton: FloatingActionButton(
         tooltip: "Add",
