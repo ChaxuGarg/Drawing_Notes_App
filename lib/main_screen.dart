@@ -13,6 +13,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   TextEditingController search = TextEditingController();
   TextEditingController newDrawing = TextEditingController();
+  TextEditingController rename = TextEditingController();
   List<List<Offset>> _points = [<Offset>[]];
   List<int> displayIndex = [];
   List<String> titles = [];
@@ -20,6 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   bool _isLoading = true;
 
   final _formKey = GlobalKey<FormState>();
+  final _renameKey = GlobalKey<FormState>();
 
   List<Dismissible> get_drawing_list(List<int> displayIndex) {
     List<Dismissible> display = [];
@@ -47,7 +49,11 @@ class _MainScreenState extends State<MainScreen> {
             titles.removeAt(index);
           });
         },
-        child: Container(
+        child: GestureDetector(
+          onLongPress: () {
+            _renameDialog(context, index);
+          },
+            child: Container(
           child: ListTile(
             title: Text(
               titles[index],
@@ -60,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
               final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (drawingContext) => DrawingScreen(
+                      builder: (context) => DrawingScreen(
                             points: _points[index],
                           )));
               setState(() {
@@ -70,7 +76,7 @@ class _MainScreenState extends State<MainScreen> {
             },
           ),
           decoration: BoxDecoration(border: Border.all(color: Colors.grey)),
-        ));
+        )));
   }
 
   _saveDrawing(List<List<Offset>> points) async {
@@ -139,6 +145,56 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _isLoading = false;
     });
+  }
+
+  _renameDialog(context, int index) {
+    rename.text = "";
+    showDialog(
+        context: context,
+        builder: (BuildContext renameContext) {
+          return AlertDialog(
+            content: Stack(
+              overflow:  Overflow.visible,
+              children: <Widget>[
+                Form(
+                  key: _renameKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: rename,
+                          decoration: InputDecoration(
+                            labelText: 'Title',
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue)
+                            )
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: RaisedButton(
+                          color: Colors.red,
+                          child: Text("Rename"),
+                          onPressed: () {
+                            setState(() {
+                              titles[index] = rename.text;
+                              _saveDrawing(_points);
+                            });
+                            Navigator.of(renameContext).pop();
+                          },
+                        ),
+                      )
+                    ],
+                  )
+                )
+              ],
+            ),
+          );
+        }
+    );
   }
 
   _showDialog(context) {
